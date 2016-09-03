@@ -10,6 +10,8 @@
   "license": "ISC",
   "dependencies": {
     "express": "^4.14.0",
+    "forecast-io": "^1.0.2",
+    "forecast.io-bluebird": "0.0.1",
     "mongodb": "^2.2.9"
   }
 }
