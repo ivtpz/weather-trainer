@@ -12,7 +12,7 @@ var options = {
 //Get weather
 
 
-forecast.fetch(lat, long, options).then(filterWeatherData).then(function(weather) {};});
+forecast.fetch(lat, long, options).then(filterWeatherData).then(function(weather) {console.log(weather);});
 
 function filterWeatherData (data) {
 	return new Promise(function (resolve) {

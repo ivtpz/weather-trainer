@@ -1,10 +1,6 @@
-//Major issue: checks for restrictions already in place,
-//but doesn't check, for example, that when rest after is required
-//the next day is empty before placing workout
-
-//Only get 7 days of weather data at a time
-
-//also need to handle bricks better
+// Need to run weather tests for brick within weather
+// test function instead of testing for workout weather
+// and then testing for brick
 
 var Forecast = require('forecast.io-bluebird');
 var forecast = new Forecast({
@@ -17,11 +13,13 @@ var options = {
 	extend: 'hourly'
 };
 
+
 // Get weather, sort plan based on weather
-forecast.fetch(lat, long, options).then(filterWeatherData).then(function(weather) {
+forecast.fetch(lat, long, options).then(filterWeatherData).then(function() {
 	// place remaining workouts into plan according to rank
 	// iterate through non-scheduled workouts, check for restrictions, find
 	// location that meets weather constraints and is not restricted
+	console.log(weather);
 	remain.forEach(function (workout) {
 	for(var i = 0; i < plan.length; i++) {
 		// check that workout is not already placed
@@ -31,29 +29,29 @@ forecast.fetch(lat, long, options).then(filterWeatherData).then(function(weather
 		if (workout.restrict.indexOf(i) === -1) {
 			if (plan[i].restrict === undefined || plan[i].restrict[0] !== "all" && plan[i].restrict.indexOf(training[workout.index].type) === -1) {
 				//test weather, will return time of day for given dayIndex (i) to place workout, or undefined
-				if(weatherTest(workout.name, i, weather) !== undefined) {
+				if(weatherTest(workout.name, workout.index, i, weather) !== undefined) {
 					if(!plan[i].activity) {
 						//check rest restrictions for following days before placing workout
 						if(!checkAfter(workout)) continue;
 
 						//run tests for brick
-						if(training[workout.index].brick) {
+						if(training[workout.index].brick && training[workout.index].brick !== -1) {
 							var brickIndex = training[workout.index].brick;
-							if(!checkAfter(training[brickIndex]) || weatherTest(training[brickIndex].name, i, weather) === undefined) continue;
+							if(!checkAfter(training[brickIndex]) || weatherTest(training[brickIndex].name, brickIndex, i, weather) === undefined) continue;
 						}
 
 						//place workout
 						var name = workout.name;
 						plan[i].activity = {};
-						plan[i].activity[name] = [weatherTest(name, i, weather), 1];
+						plan[i].activity[name] = [weatherTest(name, workout.index, i, weather), 1];
 						plan[i].type = [training[workout.index].type];
 						placed.push(name);
 						restrict(workout.index, plan[i].day, training[workout.index].type);
 						// place brick
-						if(training[workout.index].brick){
+						if(training[workout.index].brick && training[workout.index].brick !== -1){
 							var brickName = training[training[workout.index].brick].name;
 							var brickIndex = training[workout.index].brick;
-							plan[i].activity[brickName] = [weatherTest(name, i, weather) , 1];
+							plan[i].activity[brickName] = [weatherTest(name, workout.index, i, weather) , 1];
 							plan[i].type.push(training[brickIndex].type);
 							placed.push(brickName);
 							restrict(brickIndex, plan[i].day, training[brickIndex].type);
@@ -66,16 +64,17 @@ forecast.fetch(lat, long, options).then(filterWeatherData).then(function(weather
 	}
 	if(placed.indexOf(workout.name) === -1) console.log(workout.name + " not placed.")
 	});
-	
+
 plan.forEach(function (dayPlan) {
 	console.log(dayPlan.day + " ");
 	for(var key in dayPlan.activity) {
 		console.log(dayPlan.activity[key][0] + ": " + key);
 	}
 });
+return plan;
 });
 
- 
+
 var plan  = [{day: "sun"}, {day: "mon"}, {day:"tues"}, {day: "wed"}, {day: "thurs"}, {day: "fri"}, {day: "sat"}];
 
 var indexer = {sun: 0, mon: 1, tues: 2, wed: 3, thurs: 4, fri: 5, sat: 6};
@@ -143,7 +142,7 @@ for (i = 0; i < training.length; i++) {
 		var dayName = training[i].day[0];
 		var dayIndexer = indexer[dayName];
 		//if workout is specified as a brick, place both workouts
-		if (training[i].brick) {
+		if (training[i].brick && training[i].brick !== -1) {
 			var brickIndex = training[i].brick;
 			plan[dayIndexer].activity = {};
 			plan[dayIndexer].activity[training[i].name] = [training[i].day[1], 1];
@@ -286,7 +285,7 @@ function restrict(index, day, type) {
 	}
 }
 
-// Looks at the plan for the days after a workout would be placed 
+// Looks at the plan for the days after a workout would be placed
 //to make sure rest restrictions aren't violated
 function checkAfter(workout) {
 	if(training[workout.index].restSameType) {
@@ -339,19 +338,12 @@ function rank(array) {
 
 // returns earliest possible time of day, or undefined if
 // workout cannot be placed that day
-function weatherTest(workoutName, dayIndex, weather) {
+function weatherTest(workoutName, workoutIndex, dayIndex, weather) {
 //convert day index to position of first day in weatherTest
 //to access correct position in weather array
 	dayIndex -= weather[0].day;
 	if (dayIndex < 0) dayIndex += weather.length;
-	//find index in training array of workout passed into
-	//function as argument
-	for (var i = 0; i < training.length; i++) {
-		if (training[i].name === workoutName) {
-			var workoutIndex = i;
-			break;
-		}
-	}
+
 	var timesOfDay = ["morning", "midDay", "night"];
 	for (var j = 0; j < timesOfDay.length; j++) {
 		var timeOfDay = timesOfDay[j];

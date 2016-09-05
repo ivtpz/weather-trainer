@@ -2,16 +2,18 @@
   "name": "weather_training_planner",
   "version": "1.0.0",
   "description": "Triathlon training planned around weather conditions",
-  "main": "sort.js",
+  "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Ivey Topaz",
   "license": "ISC",
   "dependencies": {
+    "body-parser": "^1.4.3",
     "express": "^4.14.0",
-    "forecast-io": "^1.0.2",
     "forecast.io-bluebird": "0.0.1",
-    "mongodb": "^2.2.9"
+    "method-override": "^2.3.6",
+    "mongodb": "^2.2.9",
+    "mongoose": "^4.6.0"
   }
 }
