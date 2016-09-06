@@ -3,77 +3,45 @@
 // and then testing for brick
 
 var Forecast = require('forecast.io-bluebird');
-var forecast = new Forecast({
-	key: '3fdb6a1db6e77e03ab524ab2931d0fde'
-});
-var lat = 34;
-var long = -84;
-var options = {
-	exclude: 'daily,minutely',
-	extend: 'hourly'
+var path = require('path');
+
+/*app.factory('forecastPlan', ['$http', function($http) {
+	return $http.get('gttp://api.forecast.io/forecast/3fdb6a1db6e77e03ab524ab2931d0fde' + lat.toString() + ',' + long.toString())
+		.success(function(data) {
+			console.log(data);
+		})
+		.error(function(err) {
+			return err;
+		})
+}])*/
+
+// Get weather, sort plan based on weather
+exports.index = function (req, res, err) {
+	if(err) console.log(err);
+	res.sendFile(path.join(__dirname, '../../public', 'sort_test.html'));
+};
+
+exports.retrieveWeatherPlan = function (req, res) {
+	var forecast = new Forecast({
+		key: '3fdb6a1db6e77e03ab524ab2931d0fde'
+	});
+	var lat = 34;
+	var long = -84;
+	var options = {
+		exclude: 'daily,minutely',
+		extend: 'hourly'
+	};
+	forecast.fetch(lat, long, options)
+		.then(filterWeatherData)
+			.then(function(plan) {
+				return res.send(plan);
+			});
 };
 
 
-// Get weather, sort plan based on weather
-forecast.fetch(lat, long, options).then(filterWeatherData).then(function() {
 	// place remaining workouts into plan according to rank
 	// iterate through non-scheduled workouts, check for restrictions, find
 	// location that meets weather constraints and is not restricted
-	console.log(weather);
-	remain.forEach(function (workout) {
-	for(var i = 0; i < plan.length; i++) {
-		// check that workout is not already placed
-		if (placed.indexOf(workout.name) !== -1) break;
-		//check if rank function applied restriction for current plan day
-		//if not, continue with other tests
-		if (workout.restrict.indexOf(i) === -1) {
-			if (plan[i].restrict === undefined || plan[i].restrict[0] !== "all" && plan[i].restrict.indexOf(training[workout.index].type) === -1) {
-				//test weather, will return time of day for given dayIndex (i) to place workout, or undefined
-				if(weatherTest(workout.name, workout.index, i, weather) !== undefined) {
-					if(!plan[i].activity) {
-						//check rest restrictions for following days before placing workout
-						if(!checkAfter(workout)) continue;
-
-						//run tests for brick
-						if(training[workout.index].brick && training[workout.index].brick !== -1) {
-							var brickIndex = training[workout.index].brick;
-							if(!checkAfter(training[brickIndex]) || weatherTest(training[brickIndex].name, brickIndex, i, weather) === undefined) continue;
-						}
-
-						//place workout
-						var name = workout.name;
-						plan[i].activity = {};
-						plan[i].activity[name] = [weatherTest(name, workout.index, i, weather), 1];
-						plan[i].type = [training[workout.index].type];
-						placed.push(name);
-						restrict(workout.index, plan[i].day, training[workout.index].type);
-						// place brick
-						if(training[workout.index].brick && training[workout.index].brick !== -1){
-							var brickName = training[training[workout.index].brick].name;
-							var brickIndex = training[workout.index].brick;
-							plan[i].activity[brickName] = [weatherTest(name, workout.index, i, weather) , 1];
-							plan[i].type.push(training[brickIndex].type);
-							placed.push(brickName);
-							restrict(brickIndex, plan[i].day, training[brickIndex].type);
-						}
-						break;
-					}
-				}
-			}
-		}
-	}
-	if(placed.indexOf(workout.name) === -1) console.log(workout.name + " not placed.")
-	});
-
-plan.forEach(function (dayPlan) {
-	console.log(dayPlan.day + " ");
-	for(var key in dayPlan.activity) {
-		console.log(dayPlan.activity[key][0] + ": " + key);
-	}
-});
-return plan;
-});
-
 
 var plan  = [{day: "sun"}, {day: "mon"}, {day:"tues"}, {day: "wed"}, {day: "thurs"}, {day: "fri"}, {day: "sat"}];
 
@@ -212,8 +180,77 @@ function filterWeatherData (data) {
 	if (weather[7]) {
 		weather = weather.slice(0,7);
 	}
-	resolve(weather);
-})
+		console.log(weather);
+// Finish plan once weather is filtered and sorted
+	remain.forEach(function (workout) {
+	for(var i = 0; i < plan.length; i++) {
+		// check that workout is not already placed
+		if (placed.indexOf(workout.name) !== -1) break;
+		//check if rank function applied restriction for current plan day
+		//if not, continue with other tests
+		if (workout.restrict.indexOf(i) === -1) {
+			if (plan[i].restrict === undefined || plan[i].restrict[0] !== "all" && plan[i].restrict.indexOf(training[workout.index].type) === -1) {
+				//test weather, will return time of day for given dayIndex (i) to place workout, or undefined
+				if(weatherTest(workout.name, workout.index, i, weather) !== undefined) {
+					if(!plan[i].activity) {
+						//check rest restrictions for following days before placing workout
+						if(!checkAfter(workout)) continue;
+
+						//run tests for brick
+						if(training[workout.index].brick && training[workout.index].brick !== -1) {
+							var brickIndex = training[workout.index].brick;
+							if(!checkAfter(training[brickIndex]) || weatherTest(training[brickIndex].name, brickIndex, i, weather) === undefined) continue;
+						}
+
+						//place workout
+						var name = workout.name;
+						plan[i].activity = {};
+						plan[i].activity[name] = [weatherTest(name, workout.index, i, weather), 1];
+						plan[i].type = [training[workout.index].type];
+						placed.push(name);
+						restrict(workout.index, plan[i].day, training[workout.index].type);
+						// place brick
+						if(training[workout.index].brick && training[workout.index].brick !== -1){
+							var brickName = training[training[workout.index].brick].name;
+							var brickIndex = training[workout.index].brick;
+							plan[i].activity[brickName] = [weatherTest(name, workout.index, i, weather) , 1];
+							plan[i].type.push(training[brickIndex].type);
+							placed.push(brickName);
+							restrict(brickIndex, plan[i].day, training[brickIndex].type);
+						}
+						break;
+					}
+				}
+			}
+		}
+	}
+	if(placed.indexOf(workout.name) === -1) console.log(workout.name + " not placed.")
+	});
+	var newPlan = [];
+	for (var i = 0; i < plan.length; i++) {
+		if (plan[i].activity) {
+			var dayPlan = {
+				day: plan[i].day
+			};
+			var act = "";
+			for (key in plan[i].activity) {
+				act += key;
+				act += " ";
+			}
+			dayPlan.activity = act;
+			newPlan.push(dayPlan);
+		}
+	}
+/*console.log(plan);
+	plan.forEach(function (dayPlan) {
+		console.log(dayPlan.day + " ");
+		for(var key in dayPlan.activity) {
+			console.log(dayPlan.activity[key][0] + ": " + key);
+		}
+	});*/
+
+	resolve(newPlan);
+});
 }
 
 
