@@ -1,6 +1,6 @@
 var mongoose = require('mongoose');
 var path = require('path');
-var sort = require('./sort')
+var sort = require('./sort');
 var Training = mongoose.model('Training');
 var Index = mongoose.model('Index');
 
@@ -19,7 +19,7 @@ app.get('/api/workouts', function(req, res) {
 app.post('/api/workouts', function(req, res) {
   Training.create({
     name : req.body.name,
-    // index: req.body.index,
+    index: req.body.index,
     type : req.body.type,
     restAllType: req.body.restAllType,
     restSameType: req.body.restSameType,
@@ -48,34 +48,40 @@ app.delete('/api/workouts/', function(req, res) {
   });
 });
 
-// app.put('/api/indexer', function(req, res) {
-//   var query = {count: req};
-//   Index.update(query, {count: req++}, function(err, index) {
-//     if (err)
-//       res.send(err);
-//     res.send(index.count);
-//   });
-// });
+app.post('/api/indexer', function(req, res) {
+  Index.create({
+    count : 0
+  }, function(err, workout) {
+    if (err)
+      res.send(err);
 
-// app.post('/api/indexer', function(req, res) {
-//   Index.create({count: 0}, function(err, entry) {
-//     if (err)
-//       res.send(err);
-//     res.json(entry);
-//   });
-// });
+//find workout after sending to DB
+  Index.find(function(err, currIndex) {
+    if (err)
+      res.send(err);
+    res.json(currIndex);
+  });
+});
+});
 
-//   app.get('/api/indexer', function(req, res) {
-//     Index.find(function(err, entry) {
-//     if (err)
-//       res.send(err)
-//     if(entry.length === 0) {
-//       res.send(true);
-//     } else {
-//       res.send(false);
-//     }
-//   });
-// });
+app.put('/api/indexer', function(req, res) {
+  console.log(req.body);
+  var newIndex = req.body.count + 1;
+  console.log(newIndex);
+  Index.findOneAndUpdate(req.body, {count: newIndex}, {'new': true}, function(err, index) {
+    if (err)
+      res.send(err);
+    res.json(index);
+  });
+});
+
+app.get('/api/indexer', function(req, res) {
+  Index.find(function(err, currIndex) {
+    if (err)
+      res.send(err)
+    res.json(currIndex);
+  });
+});
 
 
 //application======================================
