@@ -1,8 +1,12 @@
 weatherApp.controller('MainController', ['$scope', 'PlanFactory', 'workouts', '$http', function($scope, PlanFactory, workouts, $http) {
 
-$scope.workout = workouts.workouts;
-$scope.index;
-// At first page landing (not on reload), set index to 0
+//Get current list of added workouts stored in w.workouts
+
+$scope.workouts = [];
+
+// If database is empty, set index to 0, otherwise
+// set scope index to count in route /api/indexer
+// /api/indexer always has 1 entry, increments when workout is added
 $http.get('/api/indexer').success(function(data) {
   if(data.length === 0) {
     $http.post('/api/indexer').success(function(data) {
@@ -10,11 +14,8 @@ $http.get('/api/indexer').success(function(data) {
     });
   } else {
     $scope.index = data[0].count;
-    console.log($scope.index);
   }
 });
-
-setTimeout(function() {console.log($scope.index);}, 3000);
 
 
 //Run weather planner after all workouts are loaded (final submit)
@@ -35,7 +36,13 @@ setTimeout(function() {console.log($scope.index);}, 3000);
       restAllType: $scope.restAllType,
       restSameType: $scope.restSameType,
       day: [$scope.selectDay]
-    }).then(function(newIndex) {
+    }).then(function(workouts) {
+      $scope.workouts = workouts;
+      $scope.$apply();
+      console.log($scope.workouts);
+    });
+
+    workouts.addOne($scope.index).then(function(newIndex) {
       $scope.index = newIndex;
     });
   };

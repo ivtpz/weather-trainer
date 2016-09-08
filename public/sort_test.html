@@ -14,6 +14,7 @@
       <div class=col-sm-8>
         <ng-form name="workoutForm" novalidate>
           <div class="form-group">
+            <ng-include src="form.html"></ng-include>
             <label for="workoutName">Workout Name:</label>
             <input type="text" class="form-control" name="workoutName" ng-model="workoutName" placeholder="eg. Long Run (Use unique names for each workout)" ng-pattern="/^\S.{3,30}$/" required>
             <label for="workoutType" ng-show="workoutForm.workoutName.$valid">Activity Type:</label>
@@ -58,16 +59,21 @@
                   <option value="fri">Friday</option>
                   <option value="sat">Saturday</option>
                 </select>
-              </span>
               <br>
-            <button ng-click="loadWorkouts()" type="submit" ng-class="{'btn btn-success': workoutForm.selectDay.$valid, 'btn btn-warning': workoutForm.selectDay.$invalid}" >Add Workout</button>
+            <button ng-click="loadWorkouts()" type="submit" ng-class="{'btn btn-success': workoutForm.selectDay.$valid, 'btn btn-warning': workoutForm.selectDay.$invalid}" ng-disabled="workoutForm.selectDay.$invalid">Add Workout</button>
+              </span>
             <br><br>
             <button ng-click="runPlanner(form)" type="submit" ng-class="{'btn btn-warning' : !displayPlan}">Plan My Week</button>
           </div>
         </ng-form>
       </div>
-      <div class="col-sm-4">
-      <h1>display</h1>
+      <div class="col-sm-2">
+        <div class="panel-group" ng-repeat="workout in workouts">
+          <div class="panel panel-success">
+            <div class="panel-heading"><h3 class="panel-title">{{ workout.name }}</h3></div>
+              <div class="panel-body">{{ workout.type[0].toUpperCase() + workout.type.slice(1) }}</div>
+          </div>
+        </div>
       </div>
     </div>
     <div class="jumbotron" ng-repeat="day in plan" ng-show="displayPlan">

@@ -6,9 +6,7 @@ weatherApp.factory('PlanFactory', ['$resource', function($resource) {
 }]);
 
 weatherApp.factory('workouts', ['$http', function($http){
-  var w = {
-    workouts: []
-  };
+var w ={};
 
   w.getAll = function() {
     return $http.get('/api/workouts').success(function(data){
@@ -19,17 +17,20 @@ weatherApp.factory('workouts', ['$http', function($http){
   w.create = function(workout) {
     return new Promise(function(resolve) {
      $http.post('/api/workouts', workout).success(function(data){
-      w.workouts.push(data);
+      resolve(data);
     });
+   });
+  };
      // increment index
-    var currentIndex = workout.index;
-    $http.put('/api/indexer', {count: currentIndex}).success(function(data) {
+   w.addOne = function(currentIndex){
+    return new Promise(function(resolve) {
+      $http.put('/api/indexer', {count: currentIndex}).success(function(data) {
       resolve(data.count);
     });
-  });
+   });
   };
+return w;
 
-  return w;
 }]);
 
 
