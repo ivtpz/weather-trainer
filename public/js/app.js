@@ -17,10 +17,8 @@ weatherApp.factory('workouts', ['$http', function($http){
   };
 
   w.create = function(workout) {
-    console.log(workout);
      $http.post('/api/workouts', workout).success(function(data){
       w.workouts.push(data);
-      console.log(data);
     });
   };
 

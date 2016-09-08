@@ -2,6 +2,14 @@ weatherApp.controller('MainController', ['$scope', 'PlanFactory', 'workouts', '$
 
 $scope.workout = workouts.workouts;
 
+// At page landing, set index to 0
+
+//   $http.post('/api/indexer', {}).success(function(data) {
+//   console.log(data);
+// });
+
+
+
   $scope.runPlanner = function () {
     PlanFactory.query({}, function(success) {
       // Display plan using angular
@@ -13,8 +21,14 @@ $scope.workout = workouts.workouts;
 
   $scope.loadWorkouts = function() {
     workouts.create({
-      name: "Iveyyyyyyyyy"
+      name: $scope.workoutName,
+      //index: $scope.index,
+      type: $scope.workoutType,
+      restAllType: $scope.restAllType,
+      restSameType: $scope.restSameType,
+      day: [$scope.selectDay]
     });
+    $scope.index++
   };
 
   $scope.showDayOptions = function() {
