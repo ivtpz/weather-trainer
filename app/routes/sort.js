@@ -70,7 +70,9 @@ var training = [{name: "swim1",
 				restSameType: 2,
 				restAllType: 1,
 				brick: 3,
-				time: 1},
+				time: 1,
+				day: []
+			  },
 
 				{name: "run2",
 				index: 2,
@@ -80,7 +82,8 @@ var training = [{name: "swim1",
 				weather: ["partly cloudy", "cloudy", "clear"],
 				restSameType: 1,
 				restAllType: 0,
-				time: 1.5},
+				time: 1.5,
+				day: []},
 
 				{name: "bike1",
 				index: 3,
@@ -91,7 +94,8 @@ var training = [{name: "swim1",
 				brick: 1,
 				restSameType: 2,
 				restAllType: 1,
-				time: 2},
+				time: 2,
+				day: []},
 
 				{name: "bike2",
 				index: 4,
@@ -102,11 +106,12 @@ var training = [{name: "swim1",
 				restSameType: 2,
 				restAllType: 1,
 				brick: 0,
-				time: 3}];
+				time: 3,
+				day: []}];
 
 //Place workout with predefined day on that day
 for (i = 0; i < training.length; i++) {
-	if (training[i].day) {
+	if (training[i].day.length !== 0) {
 		var dayName = training[i].day[0];
 		var dayIndexer = indexer[dayName];
 		//if workout is specified as a brick, place both workouts

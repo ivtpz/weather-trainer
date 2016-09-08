@@ -10,6 +10,7 @@ var port = process.env.PORT || 8080;
 
 // load the config ====================================
 var database = require('./config/database');
+require('./app/models/training');
 mongoose.connect(database.url, function(err) {
 	if (err) throw err;
 });

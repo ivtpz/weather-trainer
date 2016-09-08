@@ -1,6 +1,7 @@
-var Training = require('../models/training');
+var mongoose = require('mongoose');
 var path = require('path');
 var sort = require('./sort')
+var Training = mongoose.model('Training');
 
 module.exports = function(app) {
 
@@ -15,15 +16,17 @@ app.get('/api/workouts', function(req, res) {
 });
 
 app.post('/api/workouts', function(req, res) {
+  console.log("!!!!!!!!!1" +req.body.name);
   Training.create({
-    text : req.body.text
+    name : req.body.name
   }, function(err, workout) {
     if (err)
       res.send(err);
+
 //find workout after sending to DB
   Training.find(function(err, workouts) {
     if (err)
-      res.send(err)
+      res.send(err);
     res.json(workouts);
   });
 });
