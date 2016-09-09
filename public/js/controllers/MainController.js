@@ -20,11 +20,12 @@ $http.get('/api/indexer').success(function(data) {
 
 //Run weather planner after all workouts are loaded (final submit)
   $scope.runPlanner = function () {
-    PlanFactory.query({}, function(success) {
+    PlanFactory.sendWorkouts().then(function(success) {
       // Display plan using angular
       $scope.displayPlan = true;
       // Assign plan to angular variable to display in html
       $scope.plan = success;
+      $scope.$apply();
     });
   };
 
@@ -47,6 +48,34 @@ $http.get('/api/indexer').success(function(data) {
     });
   };
 
+  $scope.loadWorkoutsWeather = function() {
+    var condArray = [];
+    if($scope.clear) condArray.push("clear");
+    if($scope.partlyCloudy) condArray.push("partly cloudy");
+    if($scope.cloudy) condArray.push("cloudy");
+    if($scope.windy) condArray.push("windy");
+    if($scope.rain) condArray.push("rain");
+    workouts.create({
+      name: $scope.workoutName,
+      index: $scope.index,
+      type: $scope.workoutType,
+      restAllType: $scope.restAllType,
+      restSameType: $scope.restSameType,
+      minTemp: $scope.minTemp,
+      maxTemp: $scope.maxTemp,
+      weather: condArray
+    }).then(function(data) {
+      workouts.addOne($scope.index).then(function(newIndex) {
+        $scope.index = newIndex;
+      });
+
+      $scope.workouts = data;
+      $scope.$apply();
+    });
+
+
+  };
+
   $scope.showDayOptions = function() {
     $scope.displayDayOptions = true;
     $scope.displayWeahterOptions = false;
@@ -56,5 +85,8 @@ $http.get('/api/indexer').success(function(data) {
     $scope.displayDayOptions = false;
     $scope.displayWeahterOptions = true;
   };
-
+// Toggle Submit button for planning with weather
+$scope.$watch('[clear,partlyCloudy,cloudy,windy,rain]', function() {
+  $scope.disableBtn = !$scope.clear && !$scope.partlyCloudy && !$scope.cloudy && !$scope.windy && !$scope.rainy;}, true);
 }]);
+

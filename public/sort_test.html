@@ -14,8 +14,7 @@
       <div class=col-sm-8>
         <ng-form name="workoutForm" novalidate>
           <div class="form-group">
-            <ng-include src="form.html"></ng-include>
-            <label for="workoutName">Workout Name:</label>
+                        <label for="workoutName">Workout Name:</label>
             <input type="text" class="form-control" name="workoutName" ng-model="workoutName" placeholder="eg. Long Run (Use unique names for each workout)" ng-pattern="/^\S.{3,30}$/" required>
             <label for="workoutType" ng-show="workoutForm.workoutName.$valid">Activity Type:</label>
             <select class="form-control" name="workoutType" ng-model="workoutType" ng-show="workoutForm.workoutName.$valid" required>
@@ -60,10 +59,30 @@
                   <option value="sat">Saturday</option>
                 </select>
               <br>
-            <button ng-click="loadWorkouts()" type="submit" ng-class="{'btn btn-success': workoutForm.selectDay.$valid, 'btn btn-warning': workoutForm.selectDay.$invalid}" ng-disabled="workoutForm.selectDay.$invalid">Add Workout</button>
+              <button ng-click="loadWorkouts()" type="submit" ng-class="{'btn btn-success': workoutForm.selectDay.$valid, 'btn btn-warning': workoutForm.selectDay.$invalid}" ng-disabled="workoutForm.selectDay.$invalid">Add Workout</button>
               </span>
-            <br><br>
-            <button ng-click="runPlanner(form)" type="submit" ng-class="{'btn btn-warning' : !displayPlan}">Plan My Week</button>
+            <br>
+<!-- With weather options-->
+            <span ng-show="displayWeahterOptions">
+              <label>Temperature range in Farenheit for workout:</label>
+              <div class="row">
+                <div class="col-sm-5">
+                  <input type="number" step="5" class="form-control" name="maxTemp" ng-model="maxTemp" placeholder="Max as mult of 5, eg. 80" required>
+                </div>
+                <div class="col-sm-5">
+               <input type="number" step="5" class="form-control" name="minTemp" ng-model="minTemp" placeholder="Min as mult of 5, eg. 45" required>
+               </div>
+              </div><br/>
+              <label for="conditions">Which conditions will work? (Select at least one)</label><br/>
+              <input type="checkbox" ng-model="clear">Sunny<br/>
+              <input type="checkbox" ng-model="partlyCloudy">Partly Cloudy<br/>
+              <input type="checkbox" ng-model="cloudy">Cloudy<br/>
+              <input type="checkbox" ng-model="windy">Windy<br/>
+              <input type="checkbox" ng-model="rain">Rainy<br/>
+
+            <button ng-click="loadWorkoutsWeather()" type="submit" ng-class="{'btn btn-success': !disableBtn, 'btn btn-warning': disableBtn}" ng-disabled="disableBtn">Add Workout</button>
+            </span>
+            <button ng-click="runPlanner()" type="submit" ng-class="{'btn btn-warning' : !displayPlan}">Plan My Week</button>
           </div>
         </ng-form>
       </div>

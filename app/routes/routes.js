@@ -21,6 +21,9 @@ app.post('/api/workouts', function(req, res) {
     name : req.body.name,
     index: req.body.index,
     type : req.body.type,
+    minTemp: req.body.minTemp,
+    maxTemp: req.body.maxTemp,
+    weather: req.body.weather,
     restAllType: req.body.restAllType,
     restSameType: req.body.restSameType,
     day: req.body.day
@@ -86,7 +89,18 @@ app.get('/api/indexer', function(req, res) {
 
 //application======================================
 app.get('/', sort.index);
-app.get('/makePlan', sort.retrieveWeatherPlan);
+app.get('/makePlan', function(req, res) {
+  Training.find(function(err, workouts) {
+    if (err)
+      res.send(err);
+    sort.retrieveWeatherPlan(workouts)
+    .then(function(plan){
+      res.send(plan);
+    });
+  });
+});
 
 
 };
+
+

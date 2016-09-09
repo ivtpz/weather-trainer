@@ -20,96 +20,12 @@ exports.index = function (req, res, err) {
 	if(err) console.log(err);
 	res.sendFile(path.join(__dirname, '../../public', 'sort_test.html'));
 };
-
-exports.retrieveWeatherPlan = function (req, res) {
-	var forecast = new Forecast({
-		key: '3fdb6a1db6e77e03ab524ab2931d0fde'
-	});
-	var lat = 34;
-	var long = -84;
-	var options = {
-		exclude: 'daily,minutely',
-		extend: 'hourly'
-	};
-	forecast.fetch(lat, long, options)
-		.then(filterWeatherData)
-			.then(function(plan) {
-				return res.send(plan);
-			});
-};
+var training;
+exports.retrieveWeatherPlan = function (dbTraining) {
+	training = dbTraining;
 
 
-	// place remaining workouts into plan according to rank
-	// iterate through non-scheduled workouts, check for restrictions, find
-	// location that meets weather constraints and is not restricted
-
-var plan  = [{day: "sun"}, {day: "mon"}, {day:"tues"}, {day: "wed"}, {day: "thurs"}, {day: "fri"}, {day: "sat"}];
-
-var indexer = {sun: 0, mon: 1, tues: 2, wed: 3, thurs: 4, fri: 5, sat: 6};
-
-var placed = [];
-
-var training = [{name: "swim1",
-				index: 0,
-				type: "swim",
-				minTemp: 65,
-				weather: ["partly cloudy", "clear"],
-				restSameType: 2,
-				restAllType: 1,
-				brick: 4,
-				time: 1,
-				day:["wed", "morning"]
-				},
-
-				{name: "run1",
-				index: 1,
-				type: "run",
-				minTemp: 45,
-				maxTemp: 70,
-				weather: ["partly cloudy", "cloudy", "clear"],
-				restSameType: 2,
-				restAllType: 1,
-				brick: 3,
-				time: 1,
-				day: []
-			  },
-
-				{name: "run2",
-				index: 2,
-				type: "run",
-				minTemp: 45,
-				maxTemp: 80,
-				weather: ["partly cloudy", "cloudy", "clear"],
-				restSameType: 1,
-				restAllType: 0,
-				time: 1.5,
-				day: []},
-
-				{name: "bike1",
-				index: 3,
-				type: "bike",
-				minTemp: 60,
-				maxTemp: 80,
-				weather: ["partly cloudy", "cloudy", "clear"],
-				brick: 1,
-				restSameType: 2,
-				restAllType: 1,
-				time: 2,
-				day: []},
-
-				{name: "bike2",
-				index: 4,
-				type: "bike",
-				minTemp: 60,
-				maxTemp: 80,
-				weather: ["partly cloudy", "cloudy", "clear"],
-				restSameType: 2,
-				restAllType: 1,
-				brick: 0,
-				time: 3,
-				day: []}];
-
-//Place workout with predefined day on that day
+	//Place workout with predefined day on that day
 for (i = 0; i < training.length; i++) {
 	if (training[i].day.length !== 0) {
 		var dayName = training[i].day[0];
@@ -134,9 +50,32 @@ for (i = 0; i < training.length; i++) {
 		restrict(i, dayName, training[i].type);
 	}
 }
-
-
 var remain = rank(training);
+
+//Rank which activity has the fewest possibilities
+function rank(array) {
+	var remain = [];
+	for (var i = 0; i < array.length; i++) {
+		//Check that the workout is not already scheduled / placed
+		if (placed.indexOf(array[i].name) === -1) {
+			var rank = 7;
+			var restrictDayIndexes = [];
+			for (var j = 0; j < plan.length; j++) {
+				if (plan[j].activity) {
+					rank--;
+					restrictDayIndexes.push(indexer[plan[j].day]);
+				} else if(plan[j].restrict !== undefined) {
+					if (plan[j].restrict[0] === "all" || plan[j].restrict.indexOf(array[i].type) !== -1) {
+					rank--;
+					restrictDayIndexes.push(indexer[plan[j].day]);
+					}
+				}
+			}
+			remain.push({name: array[i].name, index: i, rank: rank, restrict: restrictDayIndexes});
+		}
+	}
+	return remain.sort(function(a,b) {return a.rank > b.rank;});
+}
 
 function filterWeatherData (data) {
 	return new Promise(function (resolve) {
@@ -185,7 +124,6 @@ function filterWeatherData (data) {
 	if (weather[7]) {
 		weather = weather.slice(0,7);
 	}
-		console.log(weather);
 // Finish plan once weather is filtered and sorted
 	remain.forEach(function (workout) {
 	for(var i = 0; i < plan.length; i++) {
@@ -246,17 +184,36 @@ function filterWeatherData (data) {
 			newPlan.push(dayPlan);
 		}
 	}
-/*console.log(plan);
-	plan.forEach(function (dayPlan) {
-		console.log(dayPlan.day + " ");
-		for(var key in dayPlan.activity) {
-			console.log(dayPlan.activity[key][0] + ": " + key);
-		}
-	});*/
 
 	resolve(newPlan);
 });
-}
+};
+	return new Promise(function(finalRes) {
+		var forecast = new Forecast({
+			key: '3fdb6a1db6e77e03ab524ab2931d0fde'
+		});
+		var lat = 34;
+		var long = -84;
+		var options = {
+			exclude: 'daily,minutely',
+			extend: 'hourly'
+		};
+		forecast.fetch(lat, long, options).then(filterWeatherData).then(function(plan) {finalRes(plan);
+		});
+	});
+};
+
+
+	// place remaining workouts into plan according to rank
+	// iterate through non-scheduled workouts, check for restrictions, find
+	// location that meets weather constraints and is not restricted
+
+var plan  = [{day: "sun"}, {day: "mon"}, {day:"tues"}, {day: "wed"}, {day: "thurs"}, {day: "fri"}, {day: "sat"}];
+
+var indexer = {sun: 0, mon: 1, tues: 2, wed: 3, thurs: 4, fri: 5, sat: 6};
+
+var placed = [];
+
 
 
 
@@ -301,7 +258,27 @@ function translateCondition(cond) {
 	return trans;
 }
 
-
+// Looks at the plan for the days after a workout would be placed
+//to make sure rest restrictions aren't violated
+function checkAfter(workout) {
+  if(training[workout.index].restSameType) {
+    var rest = training[workout.index].restSameType;
+    for (var j = 1; j <= rest; j++) {
+      if (plan.length > i + j && plan[i+j].type && plan[i + j].type.indexOf(training[workout.index].type) !== -1) {
+        return false;
+      }
+    }
+  }
+  if(training[workout.index].restAllType) {
+    var rest = training[workout.index].restAllType;
+    for (var j = 1; j <= rest; j++) {
+      if (plan.length > i + j && plan[i+j].activity) {
+        return false;
+      }
+    }
+  }
+  return true;
+}
 
 //Implement limitations after a workout has been placed
 //index is location of workout in training array
@@ -327,54 +304,10 @@ function restrict(index, day, type) {
 	}
 }
 
-// Looks at the plan for the days after a workout would be placed
-//to make sure rest restrictions aren't violated
-function checkAfter(workout) {
-	if(training[workout.index].restSameType) {
-		var rest = training[workout.index].restSameType;
-		for (var j = 1; j <= rest; j++) {
-			if (plan.length > i + j && plan[i+j].type && plan[i + j].type.indexOf(training[workout.index].type) !== -1) {
-				return false;
-			}
-		}
-	}
-	if(training[workout.index].restAllType) {
-		var rest = training[workout.index].restAllType;
-		for (var j = 1; j <= rest; j++) {
-			if (plan.length > i + j && plan[i+j].activity) {
-				return false;
-			}
-		}
-	}
-	return true;
-}
 
 
 
-//Rank which activity has the fewest possibilities
-function rank(array) {
-	var remain = [];
-	for (var i = 0; i < array.length; i++) {
-		//Check that the workout is not already scheduled / placed
-		if (placed.indexOf(array[i].name) === -1) {
-			var rank = 7;
-			var restrictDayIndexes = [];
-			for (var j = 0; j < plan.length; j++) {
-				if (plan[j].activity) {
-					rank--;
-					restrictDayIndexes.push(indexer[plan[j].day]);
-				} else if(plan[j].restrict !== undefined) {
-					if (plan[j].restrict[0] === "all" || plan[j].restrict.indexOf(array[i].type) !== -1) {
-					rank--;
-					restrictDayIndexes.push(indexer[plan[j].day]);
-					}
-				}
-			}
-			remain.push({name: array[i].name, index: i, rank: rank, restrict: restrictDayIndexes});
-		}
-	}
-	return remain.sort(function(a,b) {return a.rank > b.rank;});
-}
+
 
 
 

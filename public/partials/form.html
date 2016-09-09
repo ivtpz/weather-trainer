@@ -1,0 +1,49 @@
+            <label for="workoutName">Workout Name:</label>
+            <input type="text" class="form-control" name="workoutName" ng-model="workoutName" placeholder="eg. Long Run (Use unique names for each workout)" ng-pattern="/^\S.{3,30}$/" required>
+            <label for="workoutType" ng-show="workoutForm.workoutName.$valid">Activity Type:</label>
+            <select class="form-control" name="workoutType" ng-model="workoutType" ng-show="workoutForm.workoutName.$valid" required>
+              <option value="swim">Swim</option>
+              <option value="bike">Bike</option>
+              <option value="run">Run</option>
+            </select>
+            <span ng-show="workoutForm.workoutType.$valid">
+              <label for="restAllType" >Minimum full rest days following workout?</label>
+              <select class="form-control" name="restAllType" ng-model="restAllType"  required>
+                <option value="0" selected>0</option>
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+              </select>
+
+              <label for="restSameType">Minimum days until you do this type of activity again?</label>
+              <select class="form-control" name="restSameType" ng-model="restSameType" required>
+                <option value="0" selected>0</option>
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+              </select>
+            </span>
+            <!-- <span ng-show="workoutForm.restAllType.$valid"> -->
+              <!-- <span ng-show="workoutForm.restSameType.$valid"> -->
+                <label for="setDay">Would you like to set the day for this workout?</label><br>
+                <input type="radio" name="setDay" ng-model="setDay" value="false" ng-change="showWeatherOptions()"> No (Have the planner do it.)<br>
+                <input type="radio" name="setDay" ng-model="setDay" value="true" ng-change="showDayOptions()"> Yes (I need this workout on a particular day.)<br>
+              <!-- </span> -->
+            <!-- </span> -->
+              <span ng-show="displayDayOptions">
+                <label for="workoutDay">Select Day</label>
+                <select class="form-control" name="selectDay" ng-model="selectDay" required>
+                  <option value="sun">Sunday</option>
+                  <option value="mon">Monday</option>
+                  <option value="tues">Tuesday</option>
+                  <option value="wed">Wednesday</option>
+                  <option value="thurs">Thursday</option>
+                  <option value="fri">Friday</option>
+                  <option value="sat">Saturday</option>
+                </select>
+              <br>
+              <button ng-click="loadWorkouts()" type="submit" ng-class="{'btn btn-success': workoutForm.selectDay.$valid, 'btn btn-warning': workoutForm.selectDay.$invalid}" ng-disabled="workoutForm.selectDay.$invalid">Add Workout</button>
+              </span>
+            <br>
+
