@@ -28,8 +28,9 @@ $http.get('/api/indexer').success(function(data) {
       $scope.$apply();
     });
   };
-
-  $scope.loadWorkouts = function() {
+//resetting form not working
+  $scope.loadWorkouts = function(form) {
+    console.log(form);
     workouts.create({
       name: $scope.workoutName,
       index: $scope.index,
@@ -39,13 +40,15 @@ $http.get('/api/indexer').success(function(data) {
       day: [$scope.selectDay]
     }).then(function(workouts) {
       $scope.workouts = workouts;
+      $scope.added = true;
       $scope.$apply();
-      console.log($scope.workouts);
     });
+
 
     workouts.addOne($scope.index).then(function(newIndex) {
       $scope.index = newIndex;
     });
+    form.$setPristine();
   };
 
   $scope.loadWorkoutsWeather = function() {
@@ -70,20 +73,21 @@ $http.get('/api/indexer').success(function(data) {
       });
 
       $scope.workouts = data;
+      $scope.added = true;
       $scope.$apply();
     });
 
 
   };
-
+//Probably should be directives
   $scope.showDayOptions = function() {
     $scope.displayDayOptions = true;
-    $scope.displayWeahterOptions = false;
+    $scope.displayWeatherOptions = false;
   };
 
   $scope.showWeatherOptions = function() {
     $scope.displayDayOptions = false;
-    $scope.displayWeahterOptions = true;
+    $scope.displayWeatherOptions = true;
   };
 // Toggle Submit button for planning with weather
 $scope.$watch('[clear,partlyCloudy,cloudy,windy,rain]', function() {

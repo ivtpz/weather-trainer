@@ -95,12 +95,15 @@ app.get('/makePlan', function(req, res) {
       res.send(err);
     sort.retrieveWeatherPlan(workouts)
     .then(function(plan){
-      res.send(plan);
-    });
+      Training.remove({}, function(err) {
+        if(err) console.log(err);
+      });
+      Index.remove({}, function(err) {
+        if(err) console.log(err);
+      });
+    res.send(plan);
   });
+
 });
-
-
+});
 };
-
-

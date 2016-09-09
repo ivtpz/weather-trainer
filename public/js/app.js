@@ -6,6 +6,7 @@ weatherApp.factory('PlanFactory', ['$http', function($http) {
   p.sendWorkouts= function() {
     return new Promise(function(resolve) {
       $http.get('/makePlan').success(function(data) {
+        console.log(data);
       resolve(data);
       });
     });

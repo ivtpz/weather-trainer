@@ -21,10 +21,11 @@ exports.index = function (req, res, err) {
 	res.sendFile(path.join(__dirname, '../../public', 'sort_test.html'));
 };
 var training;
+var plan;
 exports.retrieveWeatherPlan = function (dbTraining) {
+	plan  = [{day: "sun"}, {day: "mon"}, {day:"tues"}, {day: "wed"}, {day: "thurs"}, {day: "fri"}, {day: "sat"}];
 	training = dbTraining;
-
-
+	console.log(training);
 	//Place workout with predefined day on that day
 for (i = 0; i < training.length; i++) {
 	if (training[i].day.length !== 0) {
@@ -184,7 +185,7 @@ function filterWeatherData (data) {
 			newPlan.push(dayPlan);
 		}
 	}
-
+	console.log("new plan " + newPlan);
 	resolve(newPlan);
 });
 };
@@ -208,7 +209,7 @@ function filterWeatherData (data) {
 	// iterate through non-scheduled workouts, check for restrictions, find
 	// location that meets weather constraints and is not restricted
 
-var plan  = [{day: "sun"}, {day: "mon"}, {day:"tues"}, {day: "wed"}, {day: "thurs"}, {day: "fri"}, {day: "sat"}];
+
 
 var indexer = {sun: 0, mon: 1, tues: 2, wed: 3, thurs: 4, fri: 5, sat: 6};
 

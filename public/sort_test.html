@@ -10,7 +10,7 @@
 </head>
 <body ng-app="WeatherTrainingPlanner">Ivey's page
 	<div class="container-fluid" ng-controller="MainController">
-    <div class="row">
+    <div class="row" ng-hide="displayPlan">
       <div class=col-sm-8>
         <ng-form name="workoutForm" novalidate>
           <div class="form-group">
@@ -59,11 +59,11 @@
                   <option value="sat">Saturday</option>
                 </select>
               <br>
-              <button ng-click="loadWorkouts()" type="submit" ng-class="{'btn btn-success': workoutForm.selectDay.$valid, 'btn btn-warning': workoutForm.selectDay.$invalid}" ng-disabled="workoutForm.selectDay.$invalid">Add Workout</button>
+              <button type="submit" form="workoutForm" ng-click="loadWorkouts(workoutForm)"  ng-class="{'btn btn-success': workoutForm.selectDay.$valid, 'btn btn-warning': workoutForm.selectDay.$invalid}" ng-disabled="workoutForm.selectDay.$invalid">Add Workout</button>
               </span>
             <br>
 <!-- With weather options-->
-            <span ng-show="displayWeahterOptions">
+            <span ng-show="displayWeatherOptions">
               <label>Temperature range in Farenheit for workout:</label>
               <div class="row">
                 <div class="col-sm-5">
@@ -79,10 +79,15 @@
               <input type="checkbox" ng-model="cloudy">Cloudy<br/>
               <input type="checkbox" ng-model="windy">Windy<br/>
               <input type="checkbox" ng-model="rain">Rainy<br/>
-
-            <button ng-click="loadWorkoutsWeather()" type="submit" ng-class="{'btn btn-success': !disableBtn, 'btn btn-warning': disableBtn}" ng-disabled="disableBtn">Add Workout</button>
             </span>
-            <button ng-click="runPlanner()" type="submit" ng-class="{'btn btn-warning' : !displayPlan}">Plan My Week</button>
+              <div class="row">
+                <div class="col-sm-8">
+                  <button ng-click="loadWorkoutsWeather()" type="submit" ng-show="displayWeatherOptions" ng-class="{'btn btn-success': !disableBtn, 'btn btn-warning': disableBtn}" ng-disabled="disableBtn">Add Workout</button>
+                </div>
+                <div class="col-sm-4" align="right">
+                  <button ng-click="runPlanner()" type="submit" ng-class="{'btn btn-warning' : !displayPlan}" ng-show="added">Plan My Week</button>
+                </div>
+              </div>
           </div>
         </ng-form>
       </div>
@@ -95,9 +100,11 @@
         </div>
       </div>
     </div>
-    <div class="jumbotron" ng-repeat="day in plan" ng-show="displayPlan">
-        <h1>{{ day.day }}</h1>
-					<h2>{{ day.activity }}</h2>
+    <div class="row">
+      <div class="jumbotron" ng-repeat="day in plan" ng-show="displayPlan">
+          <h1>{{ day.day }}</h1>
+  					<h2>{{ day.activity }}</h2>
+      </div>
     </div>
   </div>
 
