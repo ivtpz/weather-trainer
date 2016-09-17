@@ -41,6 +41,11 @@ $http.get('/api/indexer').success(function(data) {
     }).then(function(workouts) {
       $scope.workouts = workouts;
       $scope.added = true;
+      $scope.workoutName = null;
+      $scope.workoutType = null;
+      $scope.restAllType = null;
+      $scope.restSameType = null;
+      $scope.selectDay = null;
       $scope.$apply();
     });
 
@@ -49,6 +54,7 @@ $http.get('/api/indexer').success(function(data) {
       $scope.index = newIndex;
     });
     form.$setPristine();
+    console.log(form);
   };
 
   $scope.loadWorkoutsWeather = function() {
@@ -71,9 +77,20 @@ $http.get('/api/indexer').success(function(data) {
       workouts.addOne($scope.index).then(function(newIndex) {
         $scope.index = newIndex;
       });
-
       $scope.workouts = data;
       $scope.added = true;
+      $scope.workoutName = null;
+      $scope.workoutType = null;
+      $scope.restAllType = null;
+      $scope.restSameType = null;
+      $scope.minTemp = null;
+      $scope.maxTemp = null;
+      $scope.clear = null;
+      $scope.partlyCloudy = null;
+      $scope.cloudy = null;
+      $scope.windy = null;
+      $scope.rain = null;
+      $scope.displayWeatherOptions = false;
       $scope.$apply();
     });
 
