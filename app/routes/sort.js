@@ -4,6 +4,7 @@
 
 var Forecast = require('forecast.io-bluebird');
 var path = require('path');
+var weatherAPIKey = require('./forecastAPIKey')
 
 /*app.factory('forecastPlan', ['$http', function($http) {
 	return $http.get('gttp://api.forecast.io/forecast/3fdb6a1db6e77e03ab524ab2931d0fde' + lat.toString() + ',' + long.toString())
@@ -79,6 +80,7 @@ function rank(array) {
 }
 
 function filterWeatherData (data) {
+	console.log('83', data)
 	return new Promise(function (resolve) {
 	var weather = [];
 	var week = data.hourly.data;
@@ -191,7 +193,7 @@ function filterWeatherData (data) {
 };
 	return new Promise(function(finalRes) {
 		var forecast = new Forecast({
-			key: '3fdb6a1db6e77e03ab524ab2931d0fde'
+			key: weatherAPIKey.key
 		});
 		var lat = 34;
 		var long = -84;
